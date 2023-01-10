@@ -1,0 +1,27 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "functionAppName": {
+      "value": "KPMG-Test"
+    },
+    "serverFarmName": {
+      "value": "KPMG-dev-asp"
+    },
+    "serverfarmRG": {
+      "value": "AppServicePlanRGName-rg"
+    },
+    "StorageAccName": {
+      "value": "StorageAccName"
+    },
+    "StorageAcc_RGName": {
+      "value": "StorageAccRGname-rg"
+    },
+    "AppInsightName_RGName": {
+      "value": "AppInsightsRGName-rg"
+    },
+    "AppInsightName": {
+      "value": "KPMG-App-Insights-ai-01"
+    },
+  }
+}
