@@ -31,7 +31,6 @@ namespace KPMG_Test.Function
             string clob = data?.clob;
 
             DecryptRequest request = new DecryptRequest();
-            request.CiphertextBlob = clob;
             try
             {
                 codeData codeData = codeData.fromCsv(decoded);
