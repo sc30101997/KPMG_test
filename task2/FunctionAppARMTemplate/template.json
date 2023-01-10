@@ -1,0 +1,160 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "functionAppName": {
+      "type": "string"
+    },
+    "serverFarmName": {
+      "type": "string"
+    },
+    "StorageAccName": {
+      "type": "string"
+    },
+    "StorageAcc_RGName": {
+      "type": "string"
+    },
+    "AppInsightName_RGName": {
+      "type": "string"
+    },
+    "AppInsightName": {
+      "type": "string"
+    },
+    "serverfarmRG": {
+      "type": "string"
+    }
+  },
+  "variables": {
+    "serverfarmId": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',parameters('serverfarmRG'),'/providers/Microsoft.Web/serverfarms/',parameters('serverfarmName'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2018-11-01",
+      "name": "[parameters('functionAppName')]",
+      "location": "[resourceGroup().location]",
+      "kind": "functionapp",
+      "dependsOn": [],
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "serverFarmId": "[variables('serverFarmId')]",
+        "siteConfig": {
+          "appSettings": [
+            {
+              "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+              "value": "[reference(resourceId(parameters('AppInsightName_RGName'),'Microsoft.Insights/components', parameters('AppInsightName')), '2015-05-01').InstrumentationKey]"
+            },
+            {
+              "name": "UseAzureStorageEmulator",
+              "value": "false"
+            },
+            {
+              "name": "AzureWebJobsDashboard",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',parameters('StorageAccName'),';AccountKey=',listKeys(resourceId(parameters('StorageAcc_RGName'),'Microsoft.Storage/storageAccounts', parameters('StorageAccName')), '2015-05-01-preview').key1)]"
+            },
+            {
+              "name": "AzureWebJobsStorage",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',parameters('StorageAccName'),';AccountKey=',listKeys(resourceId(parameters('StorageAcc_RGName'),'Microsoft.Storage/storageAccounts', parameters('StorageAccName')), '2015-05-01-preview').key1)]"
+            },
+            {
+              "name": "FUNCTIONS_EXTENSION_VERSION",
+              "value": "~2"
+            },
+            {
+              "name": "FUNCTIONS_WORKER_RUNTIME",
+              "value": "dotnet"
+            },
+            {
+              "name": "StorageConnection",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',parameters('StorageAccName'),';AccountKey=',listKeys(resourceId(parameters('StorageAcc_RGName'),'Microsoft.Storage/storageAccounts', parameters('StorageAccName')), '2015-05-01-preview').key1)]"
+            },
+            {
+              "name": "AzureWebJobsSecretStorageType",
+              "value": "Files"
+            },
+            {
+              "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',parameters('StorageAccName'),';AccountKey=',listKeys(resourceId(parameters('StorageAcc_RGName'),'Microsoft.Storage/storageAccounts', parameters('StorageAccName')), '2015-05-01-preview').key1)]"
+            },
+            {
+              "name": "WEBSITE_CONTENTSHARE",
+              "value": "[parameters('functionAppName')]"
+            }
+          ]
+        },
+        "scmIpSecurityRestrictionsUseMain": false,
+        "http20Enabled": false,
+        "minTlsVersion": "1.2",
+        "ftpsState": "FtpsOnly",
+        "reservedInstanceCount": 0,
+        "azureStorageAccounts": {},
+        "scmType": "VSTSRM",
+        "use32BitWorkerProcess": true,
+        "webSocketsEnabled": false,
+        "alwaysOn": false,
+        "managedPipelineMode": "Integrated",
+        "virtualApplications": [
+          {
+            "virtualPath": "/",
+            "physicalPath": "site\\wwwroot",
+            "preloadEnabled": false
+          }
+        ],
+        "loadBalancing": "LeastRequests",
+        "experiments": {
+          "rampUpRules": []
+        },
+        "autoHealEnabled": false,
+        "cors": {
+          "allowedOrigins": [
+            "https://functions.azure.com",
+            "https://functions-staging.azure.com",
+            "https://functions-next.azure.com"
+          ],
+          "supportCredentials": false
+        },
+        "numberOfWorkers": -1,
+        "defaultDocuments": [
+          "Default.htm",
+          "Default.html",
+          "Default.asp",
+          "index.htm",
+          "index.html",
+          "iisstart.htm",
+          "default.aspx",
+          "index.php"
+        ],
+        "netFrameworkVersion": "v6.0",
+        "phpVersion": "5.6",
+        "requestTracingEnabled": false,
+        "remoteDebuggingEnabled": false,
+        "remoteDebuggingVersion": "VS2022",
+        "httpLoggingEnabled": false,
+        "logsDirectorySizeLimit": 35,
+        "detailedErrorLoggingEnabled": false
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites/config",
+      "apiVersion": "2018-11-01",
+      "name": "[concat(parameters('functionAppName'), '/web')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('functionAppName'))]"
+      ],
+      "properties": {
+        "scmIpSecurityRestrictions": [
+          {
+            "ipAddress": "Any",
+            "action": "Allow",
+            "priority": 1,
+            "name": "Allow all",
+            "description": "Allow all access"
+          }
+        ]
+      }
+    }
+  ]
+}
