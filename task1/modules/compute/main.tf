@@ -45,9 +45,6 @@ resource "azurerm_virtual_machine" "web-vm" {
     admin_password = var.web_os_password
   }
 
-  os_profile_linux_config {
-    disable_password_authentication = false
-  }
 }
   
   
